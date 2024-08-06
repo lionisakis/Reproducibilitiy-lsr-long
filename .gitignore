@@ -3,6 +3,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# folders to not include in the repository
+wandb
+err
+out
+data
+indexes
+lsr42
+runs
+outputs
+
 # C extensions
 *.so
 
