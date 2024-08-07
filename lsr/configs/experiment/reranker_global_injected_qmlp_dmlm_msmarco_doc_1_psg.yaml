@@ -2,8 +2,8 @@
 defaults:
   - ../dataset@eval_dataset: msmarco_doc_pairs
   - override /dataset@train_dataset: msmarco_doc_triplets
-  - override /model: reranker_global_incorporated_qmlp_dmlm_long
-exp_name: reranker_global_incorporated_qmlp_dmlm_msmarco_doc_1_psg
+  - override /model: reranker_global_injected_qmlp_dmlm_long
+exp_name: reranker_global_injected_qmlp_dmlm_msmarco_doc_1_psg
 
 resume_from_checkpoint: lsr42/qmlp_dmlm_msmarco_distil_kl_l1_0.0001
 
