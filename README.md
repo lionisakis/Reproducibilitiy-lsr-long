@@ -1,6 +1,4 @@
-[![DOI](https://zenodo.org/badge/625236818.svg)](https://zenodo.org/doi/10.5281/zenodo.10659505)
-
-Code for SIGIR 2023 paper: Adapting Learned Sparse Retrieval to Long Documents
+This project is an extantion of [Adapting Learned Sparse Retrieval to Long Documents](https://github.com/thongnt99/lsr-long) repository
 
 ## Installation 
 - Python packages
@@ -8,6 +6,10 @@ Code for SIGIR 2023 paper: Adapting Learned Sparse Retrieval to Long Documents
 conda create --name lsr python=3.9.12
 conda activate lsr
 pip install -r requirements.txt
+```
+- Python packages in a slurm environment
+```console
+sbatch slurm/scripts/gpu/install_environment.job
 ```
 - Anserini for inverted indexing & retrieval:  Clone and compile [anserini-lsr](https://github.com/thongnt99/anserini-lsr), a customized version of Anserini for learned sparse retrieval. When compiling, add ```-Dmaven.test.skip=true``` to skip the tests.
 
@@ -17,83 +19,83 @@ pip install -r requirements.txt
 ```console
 bash scripts/prepare_msmarco_doc.sh
 ```
-
-* TREC-Robust04
-
-```console
-bash scripts/prepare_robust04.sh 
-```
 ## BM25 baselines
 ```console
 bash scripts/run_bm25_msmarco.sh 
-bash scripts/run_bm25_robust04.sh 
 ```
 ## Simple aggregation 
 To perform aggregation on MSMARCO, follow these steps. For TREC-Robust04, please modify the input and output files accordingly.
 #### 1. Running inferences on segments (passages) and queries:
 - segment inference (can be distributed on multiple gpus to speed up)
 ```console
-for i in {1..60}
-do
-input_path=data/msmarco_doc/splits_psg/part$(printf "%02d" $i)
-output_path=data/msmarco_doc/vectors/part$(printf "%02d" $i)
-batch_size=256
-type='doc'
-python -m lsr.inference --inp $input_path --out $output_path --type $type --bs $batch_size
-done
+sbatch slurm/scripts/gpu/inference_script_msmarcodoc_doc.job
 ```
 - query inference
 ```console
-input_path=data/msmarco_doc/msmarco-docdev-queries.tsv
-output_path=data/msmarco_doc/query.tsv
-batch_size=256
-type='query'
-python -m lsr.inference --inp $input_path --out $output_path --type $type --bs $batch_size
+sbatch slurm/scripts/gpu/inference_script_msmarcodoc_query.job
 ```
 #### 2. Aggregating
-- Representation aggregation
+- Representation max aggregation 
 ```console
-bash scripts/aggregate_rep_msmarco_doc.sh 
+sbatch slurm/scripts/cpu/aggregate_rep_msmarco_doc_max.job
+```
+- Representation mean aggregation
+```console
+sbatch slurm/scripts/cpu/aggregate_rep_msmarco_doc_mean.job
+```
+- Representation sum aggregation
+```console
+sbatch slurm/scripts/cpu/aggregate_rep_msmarco_doc_sum.job
 ```
 - Score (max) aggregation
 ```console
-bash scripts/aggregate_score_msmarco_doc.sh
-``` 
+sbatch slurm/scripts/cpu/aggregate_rep_msmarco_doc_max.job
+```
 ## ExactSDM and SoftSDM
 
 ### ExactSDM 
-* Estimating weights/Evaluating on MSMARCO Documents 
+| #Passages | MRR@10 | Script | 
+|--------------|--------|---------|
+| 1            |  37.00 | ```slurm/scripts/gpu/train_script_exact_sdm_long_reranker_1_psg.job``` |  
+| 2            |  37.30 | ```slurm/scripts/gpu/train_script_exact_sdm_long_reranker_2_psg.sh``` |  
+| 3            |  37.30 | ```slurm/scripts/gpu/train_script_exact_sdm_long_reranker_3_psg.sh``` |  
+| 4            |  36.96 | ```slurm/scripts/gpu/train_script_exact_sdm_long_reranker_4_psg.sh``` |  
+| 5            |  36.83 | ```slurm/scripts/gpu/train_script_exact_sdm_long_reranker_5_psg.sh``` |  
 
-| #Passages | MRR@10 | R@1000 | Script | 
-|--------------|--------|--------|---------|
-| 1            |  37.08 | 95.49  | ```scripts/train_script_exact_sdm_long_reranker_1_psg.sh``` |  
-| 2            |  37.45 | 96.51  | ```scripts/train_script_exact_sdm_long_reranker_2_psg.sh``` |  
-| 3            |  37.36 | 96.76  | ```scripts/train_script_exact_sdm_long_reranker_3_psg.sh``` |  
-| 4            |  37.03 | 96.71  | ```scripts/train_script_exact_sdm_long_reranker_4_psg.sh``` |  
-| 5            |  36.95 | 96.61  | ```scripts/train_script_exact_sdm_long_reranker_5_psg.sh``` |  
-
-* Evaluating on TREC Robust04 (zero-shot)
-```bash 
-bash scripts/evaluate_exact_sdm_trec_robust04.sh
-```
 ### SoftSDM
-* Estimating weights/Evaluating on MSMARCO Documents <br> Note: using ```+model.window_sizes=[1,2] +model.proximity=8``` generally leads to better performance on MSMARCO document but hurts TREC-Robust04 scores.
+
+| #Passages | MRR@10 | Script | 
+|--------------|--------|--------|
+| 1            |  38.10 | ```slurm/scripts/gpu/train_script_sdm_long_reranker_1_psg.sh``` |  
+| 2            |  37.41 | ```slurm/scripts/gpu/train_script_sdm_long_reranker_2_psg.sh``` |  
+| 3            |  37.02 | ```slurm/scripts/gpu/train_script_sdm_long_reranker_3_psg.sh``` |  
+| 4            |  36.64 | ```slurm/scripts/gpu/train_script_sdm_long_reranker_4_psg.sh``` |  
+| 5            |  36.58 | ```slurm/scripts/gpu/train_script_sdm_long_reranker_5_psg.sh``` |  
+
+## Global score and Global Injection for softSDM
 
 
-| #Passages | MRR@10 | R@1000 | Script | 
-|--------------|--------|--------|---------|
-| 1            |  36.98 | 95.49  | ```scripts/train_script_sdm_long_reranker_1_psg.sh``` |  
-| 2            |  37.53 | 96.51  | ```scripts/train_script_sdm_long_reranker_2_psg.sh``` |  
-| 3            |  37.41 | 96.76  | ```scripts/train_script_sdm_long_reranker_3_psg.sh``` |  
-| 4            |  36.80 | 96.71  | ```scripts/train_script_sdm_long_reranker_4_psg.sh``` |  
-| 5            |  36.79 | 96.61  | ```scripts/train_script_sdm_long_reranker_5_psg.sh``` |  
+### Global Score
 
-* Evaluating on TREC Robust04 (zero-shot)
-```bash 
-bash scripts/evaluate_sdm_trec_robust04.sh
-```
+| #Passages | MRR@10 | Script | 
+|--------------|--------|--------|
+| 1            |  32.32 | ```slurm/scripts/gpu/train_script_global_score_sdm_long_reranker_1_psg.job``` |  
+| 2            |  31.65 | ```slurm/scripts/gpu/train_script_global_score_sdm_long_reranker_2_psg.job``` |  
+| 3            |  30.83 | ```slurm/scripts/gpu/train_script_global_score_sdm_long_reranker_3_psg.job``` |  
+| 4            |  30.71 | ```slurm/scripts/gpu/train_script_global_score_sdm_long_reranker_4_psg.job``` |  
+| 5            |  31.11 | ```slurm/scripts/gpu/train_script_global_score_sdm_long_reranker_5_psg.job``` |  
+
+### Global Injection 
+| #Passages | MRR@10 | Script | 
+|--------------|--------|--------|
+| 1            |  33.18 | ```slurm/scripts/gpu/reranker_global_injected_qmlp_dmlm_msmarco_doc_1_psg.job``` |  
+| 2            |  32.32 | ```slurm/scripts/gpu/reranker_global_injected_qmlp_dmlm_msmarco_doc_2_psg.job``` |  
+| 3            |  32.14 | ```slurm/scripts/gpu/reranker_global_injected_qmlp_dmlm_msmarco_doc_3_psg.job``` |  
+| 4            |  31.06 | ```slurm/scripts/gpu/reranker_global_injected_qmlp_dmlm_msmarco_doc_4_psg.job``` |  
+| 5            |  32.35 | ```slurm/scripts/gpu/reranker_global_injected_qmlp_dmlm_msmarco_doc_5_psg.job``` |  
+
 ## Citing and Authors 
-If you find this repository helpful, please cite our following papers:
+If you find this repository helpful, please check and cite the following papers:
 - Adapting Learned Sparse Retrieval for Long Documents
 ```bibtex
 @inproceedings{nguyen:sigir2023-llsr,
