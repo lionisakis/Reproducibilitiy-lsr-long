@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#SBATCH --partition=rome
+#SBATCH --job-name=prep_robust04
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=60
+#SBATCH --time=00:55:00
+#SBATCH --output=./slurm/output/out/prep_robust04.out
+#SBATCH --error=./slurm/output/err/prep_robust04.err
+#SBATCH --mem-per-cpu=1G
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+source activate lsr
+
+echo "Download robust documents"
+srun python lsr/preprocess/prepare_robust04.py
+
+# Split the collection into 60 splits 
+echo "Split the collection into 60 partitions"
+mkdir -p data/trec-robust04/splits
+srun split --numeric-suffixes=1 --number=l/60 data/trec-robust04/collection.tsv data/trec-robust04/splits/part
+
+# Split long documents into passages 
+echo "Split long documents into passages"
+mkdir -p data/trec-robust04/splits_psg
+
+pids=""
+for f in data/trec-robust04/splits/*;
+do
+    echo $f;
+    srun python lsr/long_documents/split_long_documents.py $f # remove the & if you want to run sequentially
+    pids="$pid $!"
+done
+
+wait $pids 
+
+cat data/trec-robust04/splits/* > data/trec-robust04/collection_psgs.tsv
+unset pids 

@@ -1,0 +1,14 @@
+_target_: lsr.models.global_score_sdm_reranker_long.DualSparseEncoder
+query_encoder:
+  _target_: lsr.models.TransformerMLPSparseEncoder
+  model_name_or_dir: distilbert-base-uncased
+doc_encoder:
+  _target_: lsr.models.TransformerMLMSparseEncoder
+  model_name_or_dir: distilbert-base-uncased
+global_encoder:
+  _target_: lsr.models.Global_Encoder
+  encoder_name_or_dir: BiLSTM_Encoder
+  embedding_dim: 768
+  hidden_size_encoder: 768
+  num_layers: 2
+  

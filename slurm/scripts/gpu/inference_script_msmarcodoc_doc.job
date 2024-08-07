@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --partition gpu
+#SBATCH --ntasks=1
+#SBATCH --gres gpu:1
+#SBATCH --cpus-per-task 5
+#SBATCH --time 0-01:00:00
+#SBATCH --job-name=in_msm_d
+#SBATCH --output slurm/output/out/document_inference/inference_msmarco_doc_%a.out
+#SBATCH --error slurm/output/err/document_inference/inference_msmarco_doc_%a.err
+#DONT FORGET TO PUT THIS SBATCH --array 1-60%60
+#SBATCH --array 1-60%60
+
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load CUDA/11.7.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+# Activate a conda environment:
+source activate lsr 
+
+trap "trap ' ' TERM INT; kill -TERM 0; wait" TERM INT
+input_path=data/msmarco_doc/splits_psg/part$(printf "%02d" $SLURM_ARRAY_TASK_ID)
+output_path=data/msmarco_doc/doc_vectors/part$(printf "%02d" $SLURM_ARRAY_TASK_ID)
+batch_size=128
+type='doc'
+python -m lsr.inference --inp $input_path --out $output_path --type $type --bs $batch_size
+wait
