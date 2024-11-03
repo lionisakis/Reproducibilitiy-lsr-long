@@ -1,0 +1,80 @@
+#!/bin/bash
+#SBATCH --nodes 1
+#SBATCH -p gpu
+#SBATCH --gres gpu:1
+#SBATCH -t 00-10:00:00
+#SBATCH --job-name oeot
+#SBATCH --mem 256G
+#SBATCH -o slurm/output/out/evaluate_original_exact_w_original_trec_robust.out
+#SBATCH -e slurm/output/err/evaluate_original_exact_w_original_trec_robust.err
+# Make conda available:
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load CUDA/11.7.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+# Activate a conda environment:
+
+source activate lsr
+
+# dont forget to put a space in window_size
+window_size="1_5"
+proximity='10'
+queries='data/trec-robust04/desc-queries.tsv'
+collection='data/trec-robust04/collection_psgs.tsv'
+qrels='data/trec-robust04/robust04.qrels'
+method='exact'
+
+segments='1'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/trec-robust04/run_max_score_${segments}.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segments} segment with ${proximity} and ${window_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 64 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+
+segments='2'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/trec-robust04/run_max_score_${segments}.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segments} segment with ${proximity} and ${window_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 64 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+
+segments='3'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/trec-robust04/run_max_score_${segments}.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segments} segment with ${proximity} and ${window_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+
+segments='4'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/trec-robust04/run_max_score_${segments}.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segments} segment with ${proximity} and ${window_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+
+segments='5'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/trec-robust04/run_max_score_${segments}.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segments} segment with ${proximity} and ${window_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi

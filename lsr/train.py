@@ -23,22 +23,7 @@ def train(conf: DictConfig):
         settings=wandb.Settings(start_method="fork"),
     )
     logger.info(f"Working directiory: {os.getcwd()}")
-    print(conf.model)
-    from lsr import config
-
-    config.config = conf
-    logger.info("Resuming from checkpoint: " + str(conf.resume_from_checkpoint))
-    if "global_encoder" in conf.model: 
-        logger.info(
-            "Global model_name_or_dir: "
-            + str(conf.model.global_encoder.encoder_name_or_dir)
-            + " embedding_dim: "
-            + str(conf.model.global_encoder.embedding_dim)
-            + " hidden_size_encoder: "
-            + str(conf.model.global_encoder.hidden_size_encoder)
-        )
     trainer = instantiate(conf.trainer)
-    print(conf.resume_from_checkpoint)
     trainer.train(conf.resume_from_checkpoint)
     trainer.save_model()
     wandb.finish()

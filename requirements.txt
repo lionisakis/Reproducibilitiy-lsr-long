@@ -17,3 +17,7 @@ datasets==2.4.0
 ir-measures==0.2.3
 ir-datasets==0.5.7
 nltk==3.8.1
+matplotlib==3.9.2
+scikit-learn==1.5.2
+threadpoolctl==3.5.0
+seaborn

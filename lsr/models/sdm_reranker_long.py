@@ -132,6 +132,7 @@ class DualSparseEncoder(nn.Module):
         model_dir_or_name,
     ):
         """Load query and doc encoder from a directory"""
+        print(model_dir_or_name)
         if not Path(model_dir_or_name).is_dir():
             from huggingface_hub import snapshot_download
 
@@ -141,7 +142,11 @@ class DualSparseEncoder(nn.Module):
                 )
             except:
                 raise Exception("wrong model's checkpoint: {model_dir_or_name}")
-        if not Path(os.path.join(model_dir_or_name, "class_config.json")).exists():
+
+        if (
+            not Path(os.path.join(model_dir_or_name, "config.json")).exists()
+            and not Path(os.path.join(model_dir_or_name, "class_config.json")).exists()
+        ):
             model_dir_or_name = os.path.join(
                 model_dir_or_name, os.listdir(model_dir_or_name)[0]
             )

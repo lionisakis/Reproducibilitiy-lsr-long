@@ -19,7 +19,7 @@ tokenizer:
 
 training_arguments:
   _target_: transformers.TrainingArguments
-  output_dir: ./outputs/${exp_name}
+  output_dir: ./outputs/${exp_name}_${model.proximity}_${model.window_sizes.0}_${model.window_sizes.1}
   overwrite_output_dir: True 
   remove_unused_columns: False 
   do_train: True

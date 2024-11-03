@@ -8,7 +8,7 @@ train_dataset:
   num_psg: 1
 eval_dataset:
   num_psgs: 1
-  run_path: "run_files_top200/run_max_score_1.trec"
+  run_path: "./data/msmarco_doc/run_max_score_1_keep_200.trec"
 training_arguments: 
   per_device_train_batch_size: 64
   max_steps: 150000

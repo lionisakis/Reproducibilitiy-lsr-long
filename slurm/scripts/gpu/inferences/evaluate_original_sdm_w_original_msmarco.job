@@ -1,0 +1,100 @@
+#!/bin/bash
+#SBATCH --nodes 1
+#SBATCH -p gpu
+#SBATCH --gres gpu:1
+#SBATCH -t 00-10:00:00
+#SBATCH --job-name osom
+#SBATCH --mem 256G
+#SBATCH -o slurm/output/out/evaluate_original_sdm_w_original_msmarco_missing_info.out
+#SBATCH -e slurm/output/err/evaluate_original_sdm_w_original_msmarco_missing_info.err
+# Make conda available:
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load CUDA/11.7.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+# Activate a conda environment:
+
+source activate lsr
+
+# dont forget to put a space in window_size
+window_size='1_2'
+proximity='8'
+queries='data/msmarco_doc/msmarco-docdev-queries.tsv'
+collection='data/msmarco_doc/collection_psgs.tsv'
+qrels='data/msmarco_doc/msmarco-docdev-qrels.tsv'
+method='soft'
+
+echo "------------------------"
+echo "GOING TO THE SOFT METHOD !!!!!!!!!!!!"
+# segments='1'
+# FILE="outputs/reranker_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+# candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+# if [ -e "$FILE" ]; then
+#     echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+#     python -m lsr.rerank_long  -bs 64 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+# else
+#     echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+# fi
+
+segments='2'
+FILE="outputs/reranker_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 64 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+echo "------------------------"
+echo "GOING TO THE EXACT METHOD !!!!!!!!!!!!"
+window_size='1_5'
+proximity='10'
+queries='data/msmarco_doc/msmarco-docdev-queries.tsv'
+collection='data/msmarco_doc/collection_psgs.tsv'
+qrels='data/msmarco_doc/msmarco-docdev-qrels.tsv'
+method='exact'
+
+segments='1'
+FILE="outputs/reranker_exact_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+if [ -e "$FILE" ]; then
+    echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+    python -m lsr.rerank_long  -bs 64 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+else
+    echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+fi
+
+# segments='3'
+# FILE="outputs/reranker_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+# candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+# if [ -e "$FILE" ]; then
+#     echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+#     python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+# else
+#     echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+# fi
+
+# segments='4'
+# FILE="outputs/reranker_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+# candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+# if [ -e "$FILE" ]; then
+#     echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+#     python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+# else
+#     echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+# fi
+
+# segments='5'
+# FILE="outputs/reranker_qmlp_dmlm_msmarco_doc_ce_${segments}_psg_${proximity}_${window_size}/checkpoint-20000"
+# candidates="data/msmarco_doc/run_max_score_${segments}_keep_200.trec"
+# if [ -e "$FILE" ]; then
+#     echo "using ${segment} segment with ${proximity} and ${windo_size} with ${FILE}"
+#     python -m lsr.rerank_long  -bs 16 -topk 200 -run $candidates -q $queries -d $collection -cp $FILE -qrel $qrels -npsg $segments -m $method
+# else
+#     echo "The file '$FILE' does not exist, so cannot evaluating while using ${segments} segment."
+# fi

@@ -1,0 +1,61 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run Python Project",
+        "type": "shell",
+        "command": "${config:pythonProject.env.PYTHONPATH}",
+        "args": [
+            "${workspaceFolder}/${config:pythonProject.dir}/${config:pythonProject.script}",
+            "${config:pythonProject.arg1}",
+            "${config:pythonProject.arg2}",
+            "${config:pythonProject.arg3}",
+            "${config:pythonProject.arg4}",
+            "${config:pythonProject.arg5}",
+            "${config:pythonProject.arg6}",
+            "${config:pythonProject.arg7}",
+            "${config:pythonProject.arg8}",
+            "${config:pythonProject.arg9}",
+            "${config:pythonProject.arg10}",
+            "${config:pythonProject.arg11}",
+            "${config:pythonProject.arg12}",
+            "${config:pythonProject.arg13}",
+            "${config:pythonProject.arg14}",
+            "${config:pythonProject.arg15}",
+            "${config:pythonProject.arg16}",
+            "${config:pythonProject.arg17}",
+            "${config:pythonProject.arg18}",
+            "${config:pythonProject.arg19}",
+            "${config:pythonProject.arg20}",
+            "${config:pythonProject.arg21}",
+        ],
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared",
+          "focus": true
+        },
+        "options": {
+          "env": {
+            "PYTHONPATH": "${config:pythonProject.env.PYTHONPATH}"
+          }
+        }
+      }
+    ],
+    "problemMatcher": {
+      "owner": "python",
+      "fileLocation": ["relative", "${workspaceFolder}"],
+      "pattern": {
+        "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "severity": 4,
+        "message": 5
+      }
+    }
+  }
+  

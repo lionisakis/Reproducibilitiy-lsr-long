@@ -1,4 +1,4 @@
-#!/bin/bash
+python lsr/long_documents/max_score_aggregation.py ${input_dir}/run_psgs.trec ${input_dir}/run_max_score_${n}.trec $n#!/bin/bash
 
 #SBATCH --partition=gpu
 #SBATCH --gpus=1

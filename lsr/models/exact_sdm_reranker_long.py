@@ -55,7 +55,6 @@ class DualSparseEncoder(nn.Module):
         q_tok_weights = self.encode_queries(**queries)
         d_tok_ids = psgs["input_ids"]
         d_logits = self.encode_docs(**psgs)
-        print("d_logits shape:", d_logits.shape)
         return self._score_pairs(
             q_tok_ids, q_tok_weights, d_tok_ids, d_logits, psg_offset
         )
@@ -160,7 +159,11 @@ class DualSparseEncoder(nn.Module):
                 )
             except:
                 raise Exception("wrong model's checkpoint: {model_dir_or_name}")
-        if not Path(os.path.join(model_dir_or_name, "class_config.json")).exists():
+
+        if (
+            not Path(os.path.join(model_dir_or_name, "config.json")).exists()
+            and not Path(os.path.join(model_dir_or_name, "class_config.json")).exists()
+        ):
             model_dir_or_name = os.path.join(
                 model_dir_or_name, os.listdir(model_dir_or_name)[0]
             )

@@ -84,7 +84,7 @@ eval_dataset = MultiPSGsPairs(
     num_psgs=args.npsg,
     sep=args.sep,
 )
-
+print(eval_dataset[0])
 collator = MutiPSGsPairsBatching(tokenizer=tokenizer)
 data_loader = DataLoader(
     eval_dataset, batch_size=args.bs, collate_fn=collator, num_workers=16, shuffle=False

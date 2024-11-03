@@ -39,5 +39,5 @@ for n in ${num_psgs[@]}; do
     echo $n >> results_msmarco_doc_rm3.txt
     srun ir_measures data/msmarco_doc/msmarco-docdev-qrels.tsv runs/msmarco_doc_bm25_${n}.trec MRR@10 R@1000 >> results_msmarco_doc_rm3.txt
 
-    unset pids 
+    # unset pids 
 done

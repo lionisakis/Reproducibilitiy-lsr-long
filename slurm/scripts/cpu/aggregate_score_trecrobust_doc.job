@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#SBATCH --partition=rome
+#SBATCH --job-name=agg_sc_msm
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=05:55:00
+#SBATCH --output=./slurm/output/out/aggregate_score_trec_robust_doc.out
+#SBATCH --error=./slurm/output/err/aggregate_score_trec_robust_doc.err
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+source activate lsr
+
+input_dir=data/trec-robust04
+output_file=${input_dir}/results_max_score.txt
+echo "Indexing passages"
+
+../anserini-lsr/target/appassembler/bin/IndexCollection -collection JsonSparseVectorCollection -input ${input_dir}/doc_vectors -index ${input_dir}/index_psgs  -generator SparseVectorDocumentGenerator -threads 200 -impact -pretokenized
+
+echo "Retrieval top relevant passages"
+
+../anserini-lsr/target/appassembler/bin/SearchCollection -index ${input_dir}/index_psgs  -topics ${input_dir}/query.tsv -topicreader TsvString -output ${input_dir}/run_psgs.trec  -impact -pretokenized -hits 10000 -parallelism 200
+
+echo "Aggregating and evaluting"
+
+echo "Exp results" > $output_file
+num_psgs=(1 2 3 4 5 6 7 10)
+for n in ${num_psgs[@]}; do 
+    echo $n >> $output_file
+    python lsr/long_documents/max_score_aggregation.py ${input_dir}/run_psgs.trec ${input_dir}/run_max_score_${n}.trec $n 
+    ir_measures data/trec-robust04/robust04.qrels ${input_dir}/run_max_score_${n}.trec MRR@10 NDCG@10 R@1000 >> $output_file 
+done

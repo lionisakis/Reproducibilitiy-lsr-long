@@ -1,0 +1,22 @@
+#!/bin/bash
+
+#SBATCH --partition=rome
+#SBATCH --job-name=modify_dataset
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=60
+#SBATCH --time=05:00:00
+#SBATCH --output=./slurm/output/out/modify_msmarco_doc_dataset.out
+#SBATCH --error=./slurm/output/err/modify_msmarco_doc_dataset.err
+#SBATCH --mem-per-cpu=1G
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+source activate lsr
+
+srun python modify_dataset.py

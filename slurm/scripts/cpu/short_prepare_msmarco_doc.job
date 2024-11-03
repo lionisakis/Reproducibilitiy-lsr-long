@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#SBATCH --partition=rome
+#SBATCH --job-name=prep_msmarco_doc
+#SBATCH --ntasks=1
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=4
+#SBATCH --time=05:55:00
+#SBATCH --output=./slurm/output/out/prep_msmarco_doc.out
+#SBATCH --error=./slurm/output/err/prep_msmarco_doc.err
+module purge
+module load 2022
+module load Miniconda3/4.12.0
+module load Java/11.0.2
+
+export MAVEN_HOME=../maven/apache-maven-3.8.6/
+export PATH=$MAVEN_HOME/bin:$PATH 
+
+source activate lsr
+echo "Download msmarco documents"
+srun python lsr/preprocess/prepare_msmarco_doc.py
+
+# Split the collection into 60 splits 
+echo "Split the collection into 60 partitions"
+mkdir -p data/msmarco_doc/splits
+srun split --numeric-suffixes=1 --number=l/60  data/msmarco_doc/collection.tsv data/msmarco_doc/splits/part
+
+# Split long documents into passages 
+echo "Split long documents into passages"
+mkdir -p data/msmarco_doc/splits_psg
+pids=""
+
+for f in data/msmarco_doc/splits/*;
+do
+    # get the numver of the split that f is referning
+    number=$(echo $f | grep -o -E '[0-9]+'); 
+    # if f a data/msmasrco_doc/splits/{number} where number >6 then do the tasks
+    if [ "$number" -ge 0 ]; then 
+        echo $f;
+        srun python lsr/long_documents/split_long_documents.py $f & # remove the & if you want to run sequentially
+    fi;
+    pids="$pids $!"
+done
+
+wait $pids
+
+unset pids
