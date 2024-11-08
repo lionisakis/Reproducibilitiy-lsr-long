@@ -7,7 +7,8 @@ __pycache__/
 wandb
 err
 out
-data
+data/msmarco_doc/*
+data/trec-robust04/*
 !data/msmarco_doc/run_max_score_*_keep_200_long_dataset.trec
 !data/msmarco_doc/run_max_score_*_keep_200_short_dataset.trec
 !data/msmarco_doc/run_max_score_*_keep_200.trec
